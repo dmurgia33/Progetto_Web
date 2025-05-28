@@ -43,7 +43,7 @@ async def users_list(request: Request):
 
 
 ''' 
-Creazione prime 3 API
+Creazione prime 4 API
 '''
 
 
@@ -67,3 +67,9 @@ def get_event(db: SessionDep, id: int = Path(...)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+@router.delete("/events", status_code=204)
+def delete_all_events(db: SessionDep):
+    deleted = db.query(Event).delete()
+    db.commit()
+    return
