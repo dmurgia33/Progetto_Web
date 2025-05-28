@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.data.db import init_database
 
-
+from app.routers import events
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.mount(
     name="static"
 )
 app.include_router(frontend.router)
+app.include_router(events.router)
 
 
 if __name__ == "__main__":
