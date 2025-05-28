@@ -15,9 +15,9 @@ router = APIRouter(prefix="/events", tags=["events"],)
 
 # Definisci prima tutti gli endpoint GET
 @router.get("/", response_model=List[EventRead])
-def get_events(db: SessionDep):
+def get_events(session: SessionDep):
     statement = select(Event)
-    events = db.exec(statement).all()
+    events = session.exec(statement).all()
     return events
 
 @router.post("/")
@@ -36,9 +36,11 @@ def delete_all_events(session: SessionDep):
     return "All events deleted"
 
 @router.get("/{id}", response_model=EventRead)
-def get_event(db: SessionDep, id: int = Path(...)):
+def get_event(session: SessionDep, id: int = Path(...)):
     statement = select(Event).where(Event.id == id)
-    event = db.exec(statement).first()
+    event = session.exec(statement).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+
