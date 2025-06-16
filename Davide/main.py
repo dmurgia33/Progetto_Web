@@ -13,12 +13,14 @@ if Path(__file__).parent == Path(os.getcwd()):
 # You can add imports from here...
 
 from fastapi import FastAPI
-from app.routers import frontend
+from app.routers import frontend, registrations
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.data.db import init_database
 
 from app.routers import events
+from app.routers import users
+from app.routers import registrations
 
 
 @asynccontextmanager
@@ -37,7 +39,8 @@ app.mount(
 )
 app.include_router(frontend.router)
 app.include_router(events.router)
-
+app.include_router(users.router)
+app.include_router(registrations.router)
 
 if __name__ == "__main__":
     import uvicorn
