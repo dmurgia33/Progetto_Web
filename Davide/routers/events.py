@@ -1,19 +1,20 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Path
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.config import config
-from app.data.db import SessionDep
-from app.models.event import Event, EventRead
+from config import config
+from data.db import SessionDep
+from models.event import Event, EventRead, EventCreate
 from sqlmodel import select, Session,delete
 from typing import List, Annotated
-from app.models.user import User
-from app.models.registration import Registration
+from models.user import User
+from models.registration import Registration
 
 
 router = APIRouter(prefix="/events", tags=["events"],)
 
 
 # Definisci prima tutti gli endpoint GET
+
 @router.get("/", response_model=List[EventRead])
 def get_events(session: SessionDep):
     statement = select(Event)
@@ -28,12 +29,29 @@ def create_event(event: Event, session: SessionDep):
     session.commit()
     return "Event successfully added."
 
+
+
+
 @router.delete("/", status_code=200)
 def delete_all_events(session: SessionDep):
     statement = delete(Event)
     session.exec(statement)
     session.commit()
     return "All events deleted"
+
+@router.delete("/{id}", status_code=204)
+def delete_event(
+        session: SessionDep,
+        id: Annotated[int, Path(description="The ID of the event to delete")]
+):
+    event = session.get(Event, id)
+    if event is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    print(f"Deleting event: {event}")  # debug
+    session.delete(event)
+    session.commit()
+    print("Event deleted and committed")  # debug
 
 @router.get("/{id}", response_model=EventRead)
 def get_event(session: SessionDep, id: int = Path(...)):
@@ -42,6 +60,7 @@ def get_event(session: SessionDep, id: int = Path(...)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
 
 @router.put("/{id}", response_model=EventRead)
 def update_event(
