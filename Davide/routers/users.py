@@ -1,17 +1,16 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Path
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.config import config
-from app.data.db import SessionDep
-from app.models.event import Event, EventRead, EventCreate
+from config import config
+from data.db import SessionDep
+from models.event import Event, EventRead, EventCreate
 from sqlmodel import select, Session,delete
 from typing import List, Annotated
-from app.models.user import User
-from app.models.registration import Registration
+from models.user import User
+from models.registration import Registration
 
 
 router = APIRouter(prefix="/users", tags=["users"],)
-
 
 # Definisci prima tutti gli endpoint GET
 
@@ -20,9 +19,6 @@ def get_users(session: SessionDep):
     statement = select(User)
     users = session.exec(statement).all()
     return users
-
-
-'''edo'''
 
 @router.post("/", response_model=User)
 def create_user(user:User,session:SessionDep):
@@ -55,4 +51,5 @@ def delete_user_by_username(username:Annotated[str,Path()],session:SessionDep):
     session.delete(user)
     session.commit()
     return {f"Utente '{username}' eliminato"}
+
 
