@@ -1,26 +1,23 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, Path
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from app.config import config
+from fastapi import APIRouter, HTTPException, Path
 from app.data.db import SessionDep
 from app.models.event import Event, EventRead, EventCreate
-from sqlmodel import select, Session,delete
+from sqlmodel import select, delete
 from typing import List, Annotated
-from app.models.user import User, UserRead, UserCreate
+from app.models.user import User, UserCreate
 from app.models.registration import Registration
 
 
 
 router = APIRouter(prefix="/events", tags=["events"])
 
-
+#GET /events/ - Lista eventi
 @router.get("/", response_model=List[EventRead])
 def get_events(session: SessionDep):
     statement = select(Event)
     events = session.exec(statement).all()
     return events
 
-
+#POST /events/ - Crea un nuovo evento
 @router.post("/", response_model=EventRead, status_code=201)
 def create_event(event: EventCreate, session: SessionDep):
     """Adds a new event and returns it (with id)."""
@@ -30,6 +27,7 @@ def create_event(event: EventCreate, session: SessionDep):
     session.refresh(new_event)
     return new_event
 
+#Endpoint DELETE /events/ – Elimina tutti gli eventi
 @router.delete("/", status_code=200)
 def delete_all_events(session: SessionDep):
     statement = delete(Event)
@@ -37,6 +35,7 @@ def delete_all_events(session: SessionDep):
     session.commit()
     return "All events deleted"
 
+#DELETE /events/{id} – Elimina un evento specifico
 @router.delete("/{id}", status_code=204)
 def delete_event(
         session: SessionDep,
@@ -48,6 +47,7 @@ def delete_event(
     session.delete(event)
     session.commit()
 
+#GET /events/{id} - Mostra un evento specifico
 @router.get("/{id}", response_model=EventRead)
 def get_event(session: SessionDep, id: int = Path(...)):
     statement = select(Event).where(Event.id == id)
@@ -55,7 +55,8 @@ def get_event(session: SessionDep, id: int = Path(...)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
-
+    
+#PUT /events/{id} – Aggiorna un evento specifico
 @router.put("/{id}", response_model=EventRead)
 def update_event(
     session: SessionDep,
@@ -78,6 +79,7 @@ def update_event(
 
     return event
 
+#POST /events/{id}/register – Registra un utente a un evento
 @router.post("/{id}/register")
 def register_user_to_event(
     *,
