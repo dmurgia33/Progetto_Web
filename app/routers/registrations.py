@@ -5,14 +5,16 @@ from app.models.registration import Registration
 from app.models.registration import RegistrationRead
 from sqlmodel import select
 
-router = APIRouter()
+router = APIRouter(prefix="/registrations", tags=["registrations"])
 
-@router.get("/registrations", response_model=List[RegistrationRead])
+#GET /registrations/ — Elenco registrazioni
+@router.get("/", response_model=List[RegistrationRead])
 def get_registrations(session: SessionDep):
     registrations = session.exec(select(Registration)).all()
     return registrations
 
-@router.delete("/registrations", status_code=204)
+#DELETE /registrations/ — Elimina una registrazione specifica
+@router.delete("/", status_code=204)
 def delete_registration(
     username: str = Query(..., description="The username of the registration to delete"),
     event_id: int = Query(..., description="The event_id of the registration to delete"),
